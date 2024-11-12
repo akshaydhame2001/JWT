@@ -133,13 +133,22 @@ app.post("/signin", function (req, res) {
   console.log(users);
 });
 
-app.get("/me", function (req, res) {
+function auth(req, res, next) {
   const token = req.headers.token;
-  const decodedInformation = jwt.verify(token, JWT_SECRET); // {username: akshay@gmail.com}
-  const username = decodedInformation.username;
-  let foundUser = null;
+  const decodedInformation = jwt.verify(token, JWT_SECRET);
+  if (decodedInformation.username) {
+    req.username = decodedInformation.username;
+    next();
+  } else {
+    res.json({
+      message: "You are not logged in!",
+    });
+  }
+}
 
-  foundUser = users.find((u) => u.username === username);
+app.get("/me", auth, function (req, res) {
+  let foundUser = null;
+  foundUser = users.find((u) => u.username === req.username);
 
   if (foundUser) {
     res.json({
