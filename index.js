@@ -7,7 +7,19 @@ app.use(express.json());
 
 const users = [];
 
-function generateToken() {
+function logger(req, res, next) {
+  console.log(req.method + " request came");
+  next();
+}
+
+app.use(logger);
+
+// localhost:3000
+app.get("/", function (req, res) {
+  res.sendFile(__dirname + "/public/index.html");
+});
+
+/* function generateToken() {
   let token = "";
   const options = [
     "a",
@@ -79,6 +91,7 @@ function generateToken() {
 
   return token;
 }
+  */
 
 app.post("/signup", function (req, res) {
   const username = req.body.username;
@@ -121,6 +134,7 @@ app.post("/signin", function (req, res) {
       JWT_SECRET
     );
     // foundUser.token = token;
+    res.header("token", token);
     res.json({
       token: token,
     });
@@ -136,6 +150,7 @@ app.post("/signin", function (req, res) {
 function auth(req, res, next) {
   const token = req.headers.token;
   const decodedInformation = jwt.verify(token, JWT_SECRET);
+  console.log(decodedInformation.username);
   if (decodedInformation.username) {
     req.username = decodedInformation.username;
     next();
